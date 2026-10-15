@@ -132,24 +132,23 @@ class CFDIStorage:
         return len(comprobantes)
 
     def _export_to_parquet(self):
-        """Exports DuckDB tables to Parquet partitions."""
-        comp_df = self.con.execute("SELECT * FROM comprobantes").df()
-        if not comp_df.empty:
-            table = pa.Table.from_pandas(comp_df)
+        """Exports DuckDB tables to Parquet partitions using zero-copy PyArrow tables."""
+        comp_table = self.con.execute("SELECT * FROM comprobantes").arrow().read_all()
+        if comp_table.num_rows > 0:
             pq.write_to_dataset(
-                table,
+                comp_table,
                 root_path=self.comprobantes_dir,
                 partition_cols=["año", "mes"],
                 existing_data_behavior="overwrite_or_ignore"
             )
 
-        conc_df = self.con.execute("SELECT * FROM conceptos").df()
-        if not conc_df.empty:
-            pq.write_table(pa.Table.from_pandas(conc_df), os.path.join(self.conceptos_dir, "conceptos.parquet"))
+        conc_table = self.con.execute("SELECT * FROM conceptos").arrow().read_all()
+        if conc_table.num_rows > 0:
+            pq.write_table(conc_table, os.path.join(self.conceptos_dir, "conceptos.parquet"))
 
-        imp_df = self.con.execute("SELECT * FROM impuestos").df()
-        if not imp_df.empty:
-            pq.write_table(pa.Table.from_pandas(imp_df), os.path.join(self.impuestos_dir, "impuestos.parquet"))
+        imp_table = self.con.execute("SELECT * FROM impuestos").arrow().read_all()
+        if imp_table.num_rows > 0:
+            pq.write_table(imp_table, os.path.join(self.impuestos_dir, "impuestos.parquet"))
 
     def close(self):
         self.con.close()

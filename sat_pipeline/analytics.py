@@ -60,8 +60,7 @@ class SATAnalytics:
             GROUP BY año, mes
             ORDER BY año ASC, mes ASC
         """
-        df = self.con.execute(query).df()
-        return df.to_dict(orient="records")
+        return self.con.execute(query).arrow().read_all().to_pylist()
 
     def get_top_suppliers(self, limit: int = 5) -> List[Dict[str, Any]]:
         """Identifies top suppliers by invoiced amount."""
@@ -76,7 +75,7 @@ class SATAnalytics:
             ORDER BY total_facturado DESC
             LIMIT {int(limit)}
         """
-        return self.con.execute(query).df().to_dict(orient="records")
+        return self.con.execute(query).arrow().read_all().to_pylist()
 
     def screen_against_efos(self, blacklisted_rfcs: List[str]) -> List[Dict[str, Any]]:
         """
@@ -104,7 +103,7 @@ class SATAnalytics:
             INNER JOIN efos_blacklist b ON c.rfc_emisor = b.rfc OR c.rfc_receptor = b.rfc
             ORDER BY c.total DESC
         """
-        alerts = self.con.execute(query).df().to_dict(orient="records")
+        alerts = self.con.execute(query).arrow().read_all().to_pylist()
         self.con.execute("DROP TABLE IF EXISTS efos_blacklist;")
         return alerts
 
@@ -120,4 +119,4 @@ class SATAnalytics:
             ORDER BY importe_total DESC
             LIMIT {int(limit)}
         """
-        return self.con.execute(query).df().to_dict(orient="records")
+        return self.con.execute(query).arrow().read_all().to_pylist()
