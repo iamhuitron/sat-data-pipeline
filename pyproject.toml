@@ -24,6 +24,9 @@ dev = [
 [project.scripts]
 sat-pipeline = "sat_pipeline.cli:main"
 
+[tool.setuptools.packages.find]
+include = ["sat_pipeline*"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
