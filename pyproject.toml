@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sat-data-pipeline"
+version = "1.0.0"
+description = "High-performance XML to Parquet ETL & DuckDB analytics engine for Mexican SAT CFDI 4.0 invoices"
+readme = "README.md"
+authors = [{ name = "Miguel Delgado Huitron", email = "ianhuitron0687@gmail.com" }]
+license = { text = "MIT" }
+requires-python = ">=3.10"
+dependencies = [
+    "duckdb>=0.10.0",
+    "pyarrow>=15.0.0"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-cov>=5.0.0"
+]
+
+[project.scripts]
+sat-pipeline = "sat_pipeline.cli:main"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+addopts = "-v --strict-markers"

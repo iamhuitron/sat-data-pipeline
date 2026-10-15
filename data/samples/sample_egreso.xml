@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cfdi:Comprobante xmlns:cfdi="http://www.sat.gob.mx/cfd/4" xmlns:tfd="http://www.sat.gob.mx/TimbreFiscalDigital" Version="4.0" Serie="NC" Folio="50" Fecha="2026-03-18T16:20:00" FormaPago="03" SubTotal="2000.00" Descuento="0.00" Moneda="MXN" Total="2320.00" TipoDeComprobante="E" MetodoPago="PUE" LugarExpedicion="54740">
+  <cfdi:Emisor Rfc="XAL240101ABC" Nombre="XAOL SOFTWARE STUDIO SA DE CV" RegimenFiscal="601"/>
+  <cfdi:Receptor Rfc="CTE950810XYZ" Nombre="CLIENTE COMERCIALIZADORA DEL NORTE SA DE CV" UsoCFDI="G02"/>
+  <cfdi:Conceptos>
+    <cfdi:Concepto ClaveProdServ="84111506" Cantidad="1.00" ClaveUnidad="ACT" Descripcion="Nota de credito por bonificacion comercial" ValorUnitario="2000.00" Importe="2000.00">
+      <cfdi:Impuestos>
+        <cfdi:Traslados>
+          <cfdi:Traslado Base="2000.00" Impuesto="002" TipoFactor="Tasa" TasaOCuota="0.160000" Importe="320.00"/>
+        </cfdi:Traslados>
+      </cfdi:Impuestos>
+    </cfdi:Concepto>
+  </cfdi:Conceptos>
+  <cfdi:Complemento>
+    <tfd:TimbreFiscalDigital Version="1.1" UUID="3B33D35B-0359-4E90-B8A5-D35F33342E10"/>
+  </cfdi:Complemento>
+</cfdi:Comprobante>
