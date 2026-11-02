@@ -133,7 +133,23 @@ class CFDIStorage:
 
     def _export_to_parquet(self):
         """Exports DuckDB tables to Parquet partitions using zero-copy PyArrow tables."""
-        comp_table = self.con.execute("SELECT * FROM comprobantes").arrow().read_all()
+        def _fetch_arrow(query: str):
+            if hasattr(self.con, "sql"):
+                rel = self.con.sql(query)
+                if hasattr(rel, "to_arrow_table"):
+                    return rel.to_arrow_table()
+                if hasattr(rel, "arrow"):
+                    res = rel.arrow()
+                    return res.read_all() if hasattr(res, "read_all") else res
+            res = self.con.execute(query)
+            if hasattr(res, "fetch_arrow_table"):
+                return res.fetch_arrow_table()
+            elif hasattr(res, "arrow"):
+                r = res.arrow()
+                return r.read_all() if hasattr(r, "read_all") else r
+            raise RuntimeError(f"Unable to export DuckDB table to Arrow: {query}")
+
+        comp_table = _fetch_arrow("SELECT * FROM comprobantes")
         if comp_table.num_rows > 0:
             pq.write_to_dataset(
                 comp_table,
@@ -142,11 +158,11 @@ class CFDIStorage:
                 existing_data_behavior="overwrite_or_ignore"
             )
 
-        conc_table = self.con.execute("SELECT * FROM conceptos").arrow().read_all()
+        conc_table = _fetch_arrow("SELECT * FROM conceptos")
         if conc_table.num_rows > 0:
             pq.write_table(conc_table, os.path.join(self.conceptos_dir, "conceptos.parquet"))
 
-        imp_table = self.con.execute("SELECT * FROM impuestos").arrow().read_all()
+        imp_table = _fetch_arrow("SELECT * FROM impuestos")
         if imp_table.num_rows > 0:
             pq.write_table(imp_table, os.path.join(self.impuestos_dir, "impuestos.parquet"))
 
