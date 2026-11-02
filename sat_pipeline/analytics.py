@@ -10,6 +10,24 @@ class SATAnalytics:
     def __init__(self, duckdb_conn: duckdb.DuckDBPyConnection):
         self.con = duckdb_conn
 
+    def _query_to_pylist(self, query: str) -> List[Dict[str, Any]]:
+        """Executes query and converts results to list of dicts with multi-version DuckDB/Arrow compatibility."""
+        if hasattr(self.con, "sql"):
+            rel = self.con.sql(query)
+            if hasattr(rel, "to_arrow_table"):
+                return rel.to_arrow_table().to_pylist()
+            if hasattr(rel, "arrow"):
+                res = rel.arrow()
+                return res.read_all().to_pylist() if hasattr(res, "read_all") else res.to_pylist()
+        res = self.con.execute(query)
+        if hasattr(res, "fetch_arrow_table"):
+            return res.fetch_arrow_table().to_pylist()
+        elif hasattr(res, "arrow"):
+            r = res.arrow()
+            return r.read_all().to_pylist() if hasattr(r, "read_all") else r.to_pylist()
+        cols = [desc[0] for desc in self.con.description]
+        return [dict(zip(cols, row)) for row in res.fetchall()]
+
     def get_kpis_summary(self, target_rfc: Optional[str] = None) -> Dict[str, Any]:
         """
         Calculates executive fiscal KPIs:
@@ -60,7 +78,7 @@ class SATAnalytics:
             GROUP BY año, mes
             ORDER BY año ASC, mes ASC
         """
-        return self.con.execute(query).arrow().read_all().to_pylist()
+        return self._query_to_pylist(query)
 
     def get_top_suppliers(self, limit: int = 5) -> List[Dict[str, Any]]:
         """Identifies top suppliers by invoiced amount."""
@@ -75,7 +93,7 @@ class SATAnalytics:
             ORDER BY total_facturado DESC
             LIMIT {int(limit)}
         """
-        return self.con.execute(query).arrow().read_all().to_pylist()
+        return self._query_to_pylist(query)
 
     def screen_against_efos(self, blacklisted_rfcs: List[str]) -> List[Dict[str, Any]]:
         """
@@ -103,7 +121,7 @@ class SATAnalytics:
             INNER JOIN efos_blacklist b ON c.rfc_emisor = b.rfc OR c.rfc_receptor = b.rfc
             ORDER BY c.total DESC
         """
-        alerts = self.con.execute(query).arrow().read_all().to_pylist()
+        alerts = self._query_to_pylist(query)
         self.con.execute("DROP TABLE IF EXISTS efos_blacklist;")
         return alerts
 
@@ -119,4 +137,4 @@ class SATAnalytics:
             ORDER BY importe_total DESC
             LIMIT {int(limit)}
         """
-        return self.con.execute(query).arrow().read_all().to_pylist()
+        return self._query_to_pylist(query)
