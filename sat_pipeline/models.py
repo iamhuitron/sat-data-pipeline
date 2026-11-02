@@ -36,6 +36,21 @@ class ComprobanteRow:
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
 
+    @property
+    def is_ingreso(self) -> bool:
+        """Returns True if comprobante is of type Ingreso (I)."""
+        return bool(self.tipo_de_comprobante and self.tipo_de_comprobante.upper() == "I")
+
+    @property
+    def is_egreso(self) -> bool:
+        """Returns True if comprobante is of type Egreso (E)."""
+        return bool(self.tipo_de_comprobante and self.tipo_de_comprobante.upper() == "E")
+
+    @property
+    def base_gravable(self) -> float:
+        """Returns net taxable base (subtotal - discount)."""
+        return max(0.0, float(self.subtotal) - float(self.descuento or 0.0))
+
 
 @dataclass
 class ConceptoRow:

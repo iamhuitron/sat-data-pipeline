@@ -31,6 +31,9 @@ def test_parse_valid_cfdi():
     assert comp.rfc_emisor == "XAXX010101000"
     assert comp.rfc_receptor == "URE180429CE4"
     assert comp.tipo_de_comprobante == "I"
+    assert comp.is_ingreso is True
+    assert comp.is_egreso is False
+    assert comp.base_gravable == 5000.00
 
     assert len(conceptos) == 1
     assert conceptos[0].clave_prod_serv == "81111508"
