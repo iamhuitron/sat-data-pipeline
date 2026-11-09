@@ -6,11 +6,17 @@
 </p>
 
 <p align="left">
-  <img src="https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12-3776AB?style=flat-square&logo=python&logoColor=white" alt="Python" />
-  <img src="https://img.shields.io/badge/DuckDB-Vectorized_SQL-FFF000?style=flat-square&logo=duckdb&logoColor=black" alt="DuckDB" />
-  <img src="https://img.shields.io/badge/Apache_Arrow-Parquet-D22128?style=flat-square&logo=apachearrow&logoColor=white" alt="PyArrow" />
-  <img src="https://img.shields.io/badge/Tests-Pytest_Passing-success?style=flat-square&logo=pytest&logoColor=white" alt="Pytest" />
-  <img src="https://img.shields.io/badge/License-MIT-blue?style=flat-square" alt="MIT" />
+  <a href="https://github.com/iamhuitron"><img src="https://img.shields.io/badge/AUTHOR-@iamhuitron-1D1A16?style=for-the-badge&logo=github&logoColor=D4B87A&labelColor=141210" alt="Author" /></a>
+  <a href="https://github.com/Xaol-Studio"><img src="https://img.shields.io/badge/STUDIO-@Xaol--Studio-B89758?style=for-the-badge&logo=github&logoColor=FAF8F5&labelColor=141210" alt="Studio" /></a>
+</p>
+
+<p align="left">
+  <img src="https://img.shields.io/badge/Python-3.10_%7C_3.11_%7C_3.12-1D1A16?style=flat-square&logo=python&logoColor=D4B87A&labelColor=141210" alt="Python" />
+  <img src="https://img.shields.io/badge/DuckDB-Vectorized_SQL-1D1A16?style=flat-square&logo=duckdb&logoColor=D4B87A&labelColor=141210" alt="DuckDB" />
+  <img src="https://img.shields.io/badge/Apache_Arrow-Parquet-1D1A16?style=flat-square&logo=apachearrow&logoColor=D4B87A&labelColor=141210" alt="PyArrow" />
+  <img src="https://img.shields.io/badge/SAT_Audit-CFDI_4.0_&_Art._69B-611624?style=flat-square&labelColor=141210&logoColor=FAF8F5" alt="SAT" />
+  <img src="https://img.shields.io/badge/Tests-Pytest_Passing-1B3B2B?style=flat-square&logo=pytest&logoColor=D4B87A&labelColor=141210" alt="Pytest" />
+  <img src="https://img.shields.io/badge/License-MIT-1D1A16?style=flat-square&labelColor=141210&logoColor=D4B87A" alt="MIT" />
 </p>
 
 ---
@@ -28,29 +34,21 @@ In Mexican enterprise accounting and ERP data engineering, fiscal vouchers (**CF
 
 ## 🏗️ System Architecture
 
-```
-┌────────────────────────────────────────────────────────┐
-│                   Raw CFDI XML Ingestion               │
-│          (Bulk Directories, Zip Archives, Streams)     │
-└───────────────────────────┬────────────────────────────┘
-                            │
-              Iterative ElementTree Streaming
-                            │
-┌───────────────────────────▼────────────────────────────┐
-│              Relational Tabular Normalizer             │
-│   ├── Comprobante (UUID, RFCs, Subtotal, Total, Tipo)   │
-│   ├── Conceptos (ClaveProdServ, Cantidad, Importe)     │
-│   └── Impuestos (Base, Tasa, Importe, TipoFactor)      │
-└───────────────────────────┬────────────────────────────┘
-                            │
-        Zero-Copy Arrow Batching & DuckDB Storage
-                            │
-┌───────────────────────────▼────────────────────────────┐
-│             Columnar Storage & Analytics Lake          │
-│   ├── Partitioned Parquet: data/lake/comprobantes/     │
-│   ├── Embedded DuckDB: sat_analytics.duckdb            │
-│   └── Vectorized SQL Queries: KPIs, VAT, EFOS Blacklist│
-└────────────────────────────────────────────────────────┘
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#141210', 'primaryTextColor': '#FAF8F5', 'primaryBorderColor': '#B89758', 'lineColor': '#B89758', 'secondaryColor': '#1D1A16', 'tertiaryColor': '#0D0C0A', 'mainBkg': '#141210', 'nodeBorder': '#B89758', 'clusterBkg': '#0D0C0A', 'clusterBorder': '#262420', 'titleColor': '#D4B87A', 'edgeLabelBackground': '#141210', 'fontFamily': 'JetBrains Mono, Plus Jakarta Sans, sans-serif' }}}%%
+flowchart TD
+    A["Raw CFDI 4.0 / 3.3 XML Ingestion<br/>(Bulk Directories, Zip Archives, Streams)"] -->|Iterative ElementTree Streaming| B["Relational Tabular Normalizer"]
+    subgraph Normalizer["Normalized Relational Entities"]
+        B --> B1["Comprobante<br/>(UUID, RFCs, Subtotal, Total, Tipo)"]
+        B --> B2["Conceptos<br/>(ClaveProdServ, Cantidad, Importe)"]
+        B --> B3["Impuestos<br/>(Base, Tasa, Importe, TipoFactor)"]
+    end
+    B1 & B2 & B3 -->|Zero-Copy Arrow Batching| C["Columnar Storage & Analytics Lake"]
+    subgraph Lakehouse["Embedded Lakehouse"]
+        C --> C1["Hive-Partitioned Parquet<br/>(data/lake/comprobantes/año/mes)"]
+        C --> C2["Embedded DuckDB<br/>(sat_analytics.duckdb)"]
+        C --> C3["Vectorized SQL Engine<br/>(KPIs, VAT Balance, O(1) Art. 69-B EFOS)"]
+    end
 ```
 
 ---
